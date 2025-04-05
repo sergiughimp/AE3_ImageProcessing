@@ -140,9 +140,80 @@ public class Image {
         //TODO: Add the provided seam
     }
 
+    private static <T> List<T> concat(T element, Collection<? extends T> elements){
+        List<T> result = new ArrayList<>();
+        result.add(element); // Add the single element first
+        result.addAll(elements); // Then add all elements from the collection
+        return result;
+    }
     private List<Pixel> getSeamMaximizing(Function<Pixel, Double> valueGetter) {
         //TODO: find the seam which maximizes total value extracted from the given pixel
-        return null;
+
+        double[] previousValues = new double[width];
+        double[] currentValues = new double[width];
+
+        List<List<Pixel>> previousSeams = new ArrayList<>();
+        List<List<Pixel>> currentSeams = new ArrayList<>();
+
+        Pixel currentPixel = rows.get(0);  // Use get(0) to access the first pixel
+        int col = 0;
+
+        // Initializing for the first row
+        while (currentPixel != null) {
+            previousValues[col] = valueGetter.apply(currentPixel);  // Apply the function to get the value
+            previousSeams.add(concat(currentPixel, List.of()));  // Add the current pixel with an empty list (initial seam)
+            col++;
+            currentPixel = currentPixel.right;  // Move to the next pixel in the row
+        }
+
+        // Fill the paths array for subsequent rows
+        for (int row = 1; row < height; row++) {
+            currentPixel = rows.get(row);
+            col = 0;
+
+            while (currentPixel != null) {
+                double maxVal = previousValues[col];
+                int ref = col;
+
+                // Compare with left, current, and right pixels for the maximum value
+                if (col > 0 && previousValues[col - 1] > maxVal) {
+                    maxVal = previousValues[col - 1];
+                    ref = col - 1;
+                }
+                if (col < width - 1 && previousValues[col + 1] > maxVal) {
+                    maxVal = previousValues[col + 1];
+                    ref = col + 1;
+                }
+
+                // Update the current value with the maximum value from neighbors + current pixel's value
+                currentValues[col] = maxVal + valueGetter.apply(currentPixel);
+
+                // Build the seam path by concatenating the current pixel with the previous best path
+                currentSeams.add(concat(currentPixel, previousSeams.get(ref)));
+
+                col++;
+                currentPixel = currentPixel.right;
+            }
+
+            // Swap the arrays and lists for the next iteration
+            previousValues = currentValues;
+            currentValues = new double[width];
+            previousSeams = currentSeams;
+            currentSeams = new ArrayList<>();
+        }
+
+        // Finding the seam with the maximum sum of values
+        double maxValue = previousValues[0];
+        int maxValueIndex = 0; // Should be an int, not a double
+        for (int i = 1; i < width; i++) {
+            if (previousValues[i] > maxValue) {
+                maxValue = previousValues[i];
+                maxValueIndex = i;
+            }
+        }
+
+        // Return the seam with the maximum value
+        return previousSeams.get(maxValueIndex);
     }
 
     public List<Pixel> getGreenestSeam() {
