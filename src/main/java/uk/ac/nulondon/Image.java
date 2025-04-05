@@ -56,7 +56,20 @@ public class Image {
 
     double energy(Pixel above, Pixel current, Pixel below) {
         //TODO: Calculate energy based on neighbours of the current pixel
-        return 0;
+        double a = above.left.brightness();
+        double b = above.brightness();
+        double c = above.right.brightness();
+
+        double d = current.left.brightness();
+        double f = current.right.brightness();
+
+        double g = below.left.brightness();
+        double h = below.brightness();
+        double i = below.right.brightness();
+
+        double h_energy = (a + 2 * d + g) - (c + 2 * f + i);
+        double v_energy = (a + 2 * b + c) - (g + 2 * h + i);
+        return Math.sqrt(h_energy * h_energy + v_energy * v_energy);
     }
 
     public void calculateEnergy() {

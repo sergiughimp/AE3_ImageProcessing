@@ -20,7 +20,7 @@ public class Pixel {
 
     public double brightness() {
         //TODO: implement brightness calculation
-        return 0;
+        return (double) (color.getBlue() + color.getGreen() + color.getRed()) / 3;
     }
 
     public double getGreen() {
