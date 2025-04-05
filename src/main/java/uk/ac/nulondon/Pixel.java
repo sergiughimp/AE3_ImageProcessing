@@ -20,7 +20,16 @@ public class Pixel {
 
     public double brightness() {
         //TODO: implement brightness calculation
-        return (double) (color.getBlue() + color.getGreen() + color.getRed()) / 3;
+
+        // Calculate the brightness of the pixel based on its RGB color components.
+        // Get the blue, green, and red color components of the pixel
+        int blue = color.getBlue();   // Blue component of the pixel
+        int green = color.getGreen(); // Green component of the pixel
+        int red = color.getRed();     // Red component of the pixel
+
+        // Calculate the brightness by averaging the RGB values
+        // This gives a simple approximation of the pixel's brightness based on its color components
+        return (double) (blue + green + red) / 3;
     }
 
     public double getGreen() {

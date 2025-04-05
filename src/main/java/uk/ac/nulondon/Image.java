@@ -56,24 +56,49 @@ public class Image {
 
     double energy(Pixel above, Pixel current, Pixel below) {
         //TODO: Calculate energy based on neighbours of the current pixel
-        double a = above.left.brightness();
-        double b = above.brightness();
-        double c = above.right.brightness();
 
-        double d = current.left.brightness();
-        double f = current.right.brightness();
+        // Calculate energy based on the neighboring pixels of the current pixel (above, current, below)
 
-        double g = below.left.brightness();
-        double h = below.brightness();
-        double i = below.right.brightness();
+        // Get the brightness values of the neighboring pixels around the 'above' pixel
+        double a = above.left.brightness();   // Brightness of the pixel to the left of the 'above' pixel
+        double b = above.brightness();        // Brightness of the 'above' pixel itself
+        double c = above.right.brightness(); // Brightness of the pixel to the right of the 'above' pixel
 
+        // Get the brightness values of the neighboring pixels around the 'current' pixel
+        double d = current.left.brightness(); // Brightness of the pixel to the left of the 'current' pixel
+        double f = current.right.brightness(); // Brightness of the pixel to the right of the 'current' pixel
+
+        // Get the brightness values of the neighboring pixels around the 'below' pixel
+        double g = below.left.brightness();  // Brightness of the pixel to the left of the 'below' pixel
+        double h = below.brightness();       // Brightness of the 'below' pixel itself
+        double i = below.right.brightness(); // Brightness of the pixel to the right of the 'below' pixel
+
+        // Calculate the horizontal energy component by considering the pixel's left-right neighbors
         double h_energy = (a + 2 * d + g) - (c + 2 * f + i);
+
+        // Calculate the vertical energy component by considering the pixel's up-down neighbors
         double v_energy = (a + 2 * b + c) - (g + 2 * h + i);
+
+        // Return the total energy by calculating the Euclidean distance between horizontal and vertical energies
         return Math.sqrt(h_energy * h_energy + v_energy * v_energy);
     }
 
     public void calculateEnergy() {
         //TODO: calculate energy for all the pixels in the image
+
+        // Loop through all pixels in the image, excluding the boundary pixels
+        for (int row = 1; row < height - 1; row++) {
+            for (int col = 1; col < width - 1; col++) {
+                // Access the neighboring pixels: above, current, and below
+                // Using the row and column index to get the appropriate pixel from the 'rows' list
+                Pixel above = rows.get((row - 1) * width + col);  // Pixel above the current one
+                Pixel current = rows.get(row * width + col);      // The current pixel
+                Pixel below = rows.get((row + 1) * width + col);   // Pixel below the current one
+
+                // Calculate the energy for the current pixel based on its neighbors
+                current.energy = energy(above, current, below);
+            }
+        }
     }
 
     public List<Pixel> higlightSeam(List<Pixel> seam, Color color) {
@@ -83,6 +108,28 @@ public class Image {
 
     public void removeSeam(List<Pixel> seam) {
         //TODO: remove the provided seam
+
+        // Decrease the width by 1 to account for the removed seam
+        width--;
+
+        // Process each row in the seam, updating the corresponding pixel links
+        for (int row = 0; row < height; row++) {
+            // Get the pixel corresponding to the current row in the seam
+            Pixel pixel = seam.get(row);
+
+            // If the pixel is not the leftmost one, update the left neighbor
+            if (pixel.left != null) {
+                pixel.left.right = pixel.right;
+            } else {
+                // For the leftmost pixel, update the first pixel in the row
+                rows.set(row, pixel.right);
+            }
+
+            // If the pixel is not the rightmost one, update the right neighbor
+            if (pixel.right != null) {
+                pixel.right.left = pixel.left;
+            }
+        }
     }
 
     public void addSeam(List<Pixel> seam) {
