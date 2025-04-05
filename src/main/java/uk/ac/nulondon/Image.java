@@ -57,8 +57,12 @@ public class Image {
     double energy(Pixel above, Pixel current, Pixel below) {
         //TODO: Calculate energy based on neighbours of the current pixel
 
-        // Calculate energy based on the neighboring pixels of the current pixel (above, current, below)
-
+        // Check if any of the neighboring pixels (above, current, or below) are null or invalid
+        // This ensures we don't encounter NullPointerException or invalid references
+        if (above == null || below == null || current.left == null || current.right == null) {
+            // If any of the neighbors are null, return the brightness of the current pixel as a default energy value
+            return current.brightness();
+        }
         // Get the brightness values of the neighboring pixels around the 'above' pixel
         double a = above.left.brightness();   // Brightness of the pixel to the left of the 'above' pixel
         double b = above.brightness();        // Brightness of the 'above' pixel itself
