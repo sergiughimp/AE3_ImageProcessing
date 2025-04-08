@@ -105,9 +105,23 @@ public class Image {
         }
     }
 
-    public List<Pixel> higlightSeam(List<Pixel> seam, Color color) {
-        //TODO: highlight the seam, return previous values
-        return null;
+    public List<Pixel> highlightSeam(List<Pixel> seam, Color color) {
+        // We will collect the old state (color) of each pixel in the seam
+        // so that we can restore them later, if needed.
+        List<Pixel> oldValues = new ArrayList<>(seam.size());
+
+        for (Pixel p : seam) {
+            // Record the pixel's old color in a new Pixel object
+            // (we only care about the color here, not left/right links).
+            oldValues.add(new Pixel(p.color.getRGB()));
+
+            // Now highlight the seam pixel with the given color.
+            p.color = color;
+        }
+
+        // Return the old pixel states. Each entry corresponds to the original color
+        // of the seam pixel at the same index in 'seam'.
+        return oldValues;
     }
 
     public void removeSeam(List<Pixel> seam) {
@@ -137,7 +151,28 @@ public class Image {
     }
 
     public void addSeam(List<Pixel> seam) {
-        //TODO: Add the provided seam
+        // Increase width because we are adding a vertical seam
+        width++;
+
+        // We assume 'seam' has 1 pixel per row. Each pixel’s .left and .right
+        // references still point to where it was removed.
+        for (int row = 0; row < height; row++) {
+            Pixel pixel = seam.get(row);
+
+            // If this pixel has a left neighbor, link it
+            if (pixel.left != null) {
+                pixel.left.right = pixel;
+            }
+            // Otherwise it’s the new leftmost pixel in this row
+            else {
+                rows.set(row, pixel);
+            }
+
+            // Link the pixel’s right neighbor back to this pixel if it exists
+            if (pixel.right != null) {
+                pixel.right.left = pixel;
+            }
+        }
     }
 
     private static <T> List<T> concat(T element, Collection<? extends T> elements){
