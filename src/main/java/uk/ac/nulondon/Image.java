@@ -87,6 +87,14 @@ public class Image {
         return Math.sqrt(h_energy * h_energy + v_energy * v_energy);
     }
 
+    private Pixel getPixelAt(int row, int col) {
+        Pixel p = rows.get(row);  // First pixel in row 'row'
+        for (int i = 0; i < col; i++) {
+            p = p.right;          // Move right 'col' times
+        }
+        return p;
+    }
+
     public void calculateEnergy() {
         // Loop through all rows and columns
         for (int row = 0; row < height; row++) {
