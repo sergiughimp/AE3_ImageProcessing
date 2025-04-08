@@ -88,19 +88,19 @@ public class Image {
     }
 
     public void calculateEnergy() {
-        //TODO: calculate energy for all the pixels in the image
-
-        // Loop through all pixels in the image, excluding the boundary pixels
-        for (int row = 1; row < height - 1; row++) {
-            for (int col = 1; col < width - 1; col++) {
-                // Access the neighboring pixels: above, current, and below
-                // Using the row and column index to get the appropriate pixel from the 'rows' list
-                Pixel above = rows.get((row - 1) * width + col);  // Pixel above the current one
-                Pixel current = rows.get(row * width + col);      // The current pixel
-                Pixel below = rows.get((row + 1) * width + col);   // Pixel below the current one
-
-                // Calculate the energy for the current pixel based on its neighbors
-                current.energy = energy(above, current, below);
+        // Loop through all rows and columns
+        for (int row = 0; row < height; row++) {
+            for (int col = 0; col < width; col++) {
+                Pixel current = getPixelAt(row, col);
+                // For boundary pixels, use brightness (as specified)
+                if (row == 0 || row == height - 1 || col == 0 || col == width - 1) {
+                    current.energy = current.brightness();
+                } else {
+                    // Get neighboring pixels using the linked structure
+                    Pixel above = getPixelAt(row - 1, col);
+                    Pixel below = getPixelAt(row + 1, col);
+                    current.energy = energy(above, current, below);
+                }
             }
         }
     }
