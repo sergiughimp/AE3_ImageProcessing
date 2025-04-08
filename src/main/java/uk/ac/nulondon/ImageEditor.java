@@ -17,6 +17,12 @@ public class ImageEditor {
 
     private List<Pixel> highlightedSeam = null;
 
+    private List<Pixel> highlightedSeamOldColors = null;
+
+    private Deque<Command> commandHistory = new ArrayDeque<>();
+
+    private List<Pixel> highlightedSeam = null;
+
     public void load(String filePath) throws IOException {
         File originalFile = new File(filePath);
         BufferedImage img = ImageIO.read(originalFile);
@@ -29,19 +35,45 @@ public class ImageEditor {
     }
 
     public void highlightGreenest() throws IOException {
-        //TODO: implement via Command pattern
+        List<Pixel> seam = image.getGreenestSeam();
+        // Highlight the seam in green and retrieve the seam's original colors.
+        List<Pixel> oldColors = image.highlightSeam(seam, Color.GREEN);
+        // Store for later removal or undo.
+        highlightedSeam = seam;
+        highlightedSeamOldColors = oldColors;
     }
 
     public void removeHighlighted() throws IOException {
-        //TODO: implement via Command pattern
-    }
-
-    public void undo() throws IOException {
-        //TODO: implement via Command pattern
+        if (highlightedSeam == null) {
+            System.out.println("No seam currently highlighted to remove.");
+            return;
+        }
+        Command cmd = new RemoveSeamCommand(image, highlightedSeam, highlightedSeamOldColors);
+        cmd.execute();
+        commandHistory.push(cmd);
+        // Clear the highlighted seam fields now that the seam has been removed.
+        highlightedSeam = null;
+        highlightedSeamOldColors = null;
     }
 
     public void highlightLowestEnergySeam() throws IOException {
-        //TODO: implement via Command pattern
+        List<Pixel> seam = image.getLowestEnergySeam();
+        // Highlight the seam in red and retrieve the seam's original colors.
+        List<Pixel> oldColors = image.highlightSeam(seam, Color.RED);
+        highlightedSeam = seam;
+        highlightedSeamOldColors = oldColors;
+    }
+
+    public void undo() throws IOException {
+        if (!commandHistory.isEmpty()) {
+            Command lastCmd = commandHistory.pop();
+            lastCmd.undo();
+        }
+    }
+
+    public interface Command {
+        void execute();
+        void undo();
     }
 
     //TODO: implement Command class or interface and its subtypes
