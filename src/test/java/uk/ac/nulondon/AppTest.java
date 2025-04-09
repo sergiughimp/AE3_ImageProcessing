@@ -27,13 +27,13 @@ public class AppTest {
 
     @Test
     void highlightGreenest() {
-        image.higlightSeam(image.getGreenestSeam(), Color.BLUE);
+        image.highlightSeam(image.getGreenestSeam(), Color.BLUE);
         AwtApprovals.verify(image.toBufferedImage());
     }
 
     @Test
     void highlightLowestEnergy() {
-        image.higlightSeam(image.getLowestEnergySeam(), Color.RED);
+        image.highlightSeam(image.getLowestEnergySeam(), Color.RED);
         AwtApprovals.verify(image.toBufferedImage());
     }
 
