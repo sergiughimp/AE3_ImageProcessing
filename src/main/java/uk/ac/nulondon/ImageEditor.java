@@ -11,104 +11,133 @@ import java.util.List;
 
 public class ImageEditor {
 
+    // Image data structure holds pixels and seam editing logic
     private Image image;
-    // Holds the currently highlighted seam (one pixel per row)
+
+    // Reference to the currently highlighted seam
     private List<Pixel> highlightedSeam = null;
-    // Also store the original pixel colors for that seam (to be able to undo highlighting)
+
+    // Stores original pixel colours
     private List<Pixel> previousSeamColors = null;
 
-    // Command history for undo functionality.
+    // Stack of previously executed demands
     private final Deque<CommandControl> previousCommands = new ArrayDeque<>();
 
-    // Loads the image.
+    // Loads an image from a given file path
     public void load(String filePath) throws IOException {
         File originalFile = new File(filePath);
         BufferedImage img = ImageIO.read(originalFile);
         image = new Image(img);
     }
 
-    // Saves the current image.
+    // Saves the current iteration of the image to a given file path
     public void save(String filePath) throws IOException {
         BufferedImage img = image.toBufferedImage();
         ImageIO.write(img, "png", new File(filePath));
     }
 
-
+    // Highlights the greenest seam in green
     public void highlightGreenest() throws IOException {
-        List<Pixel> seam = image.getGreenestSeam();
-        // Highlight the seam in green and retrieve the seam's original colors.
-        List<Pixel> oldColors = image.highlightSeam(seam, Color.GREEN);
-        // Store for later removal or undo.
-        highlightedSeam = seam;
-        previousSeamColors = oldColors;
+
+        // Finds the seam with the highest green value
+        List<Pixel> greenestSeam = image.getGreenestSeam();
+
+        // Highlights the seam in green and store the previous seam colours
+        List<Pixel> previousColours = image.highlightSeam(greenestSeam, Color.GREEN);
+
+        // Store references to the greenest seam and the previous seam colours
+        highlightedSeam = greenestSeam;
+        previousSeamColors = previousColours;
     }
 
-
+    // Highlights the seam with the lowest energy in red
     public void highlightLowestEnergySeam() throws IOException {
-        List<Pixel> seam = image.getLowestEnergySeam();
-        // Highlight the seam in red and retrieve the seam's original colors.
-        List<Pixel> oldColors = image.highlightSeam(seam, Color.RED);
-        highlightedSeam = seam;
-        previousSeamColors = oldColors;
+
+        // Finds the seam with the lowest energy
+        List<Pixel> lowestEnergySeam = image.getLowestEnergySeam();
+
+        // Highlights the seam in red and stores the seams previous colours
+        List<Pixel> previousColours = image.highlightSeam(lowestEnergySeam, Color.RED);
+
+        // Store references to the lowest energy seam and the previous seam colours
+        highlightedSeam = lowestEnergySeam;
+        previousSeamColors = previousColours;
     }
 
-
+    // Removes the currently highlighted seam
     public void removeHighlighted() throws IOException {
+
+        // Ensures a seam has been highlighted before attempting to remove a seam
         if (highlightedSeam == null) {
-            System.out.println("No seam currently highlighted.");
+            System.out.println("Error: No seam highlighted");
             return;
         }
-        CommandControl command = new SeamRemovalCommand(image, highlightedSeam, previousSeamColors);
+
+        // Creates a command to remove the highlighted seam
+        CommandControl command = new SeamEditCommand(image, highlightedSeam, previousSeamColors);
+
+        // Executes the removal of the seam
         command.execute();
+
+        // Pushes the command to the stack to enable the removal to be undone
         previousCommands.push(command);
-        // Clear the highlighted seam fields now that the seam has been removed.
+
+        // Remove references to the seam
         highlightedSeam = null;
         previousSeamColors = null;
     }
 
-
+    // Enables previous edits to be undone
     public void undo() throws IOException {
+
+        // If there have been previous commands the most recent command is undone
         if (!previousCommands.isEmpty()) {
-            CommandControl lastCommand = previousCommands.pop();
-            lastCommand.undo();
+            CommandControl previousCommand = previousCommands.pop();
+            previousCommand.undo();
         }
     }
 
-
+    // Interface enabling the execution of commands as well as undo functionality
     public interface CommandControl {
         void execute();
         void undo();
     }
 
-
-    public static class SeamRemovalCommand implements CommandControl {
+    /*The SeamEditCommand class enables the execution of commands
+     and stores previous data for the undo functionality
+     */
+    public static class SeamEditCommand implements CommandControl {
         private final Image image;
-        private final List<Pixel> seam;
-        private final List<Pixel> oldColors;
+        private final List<Pixel> currentSeam;
+        private final List<Pixel> previousColours;
 
-        public SeamRemovalCommand(Image image, List<Pixel> seam, List<Pixel> oldColors) {
+        // Class Constructor
+        public SeamEditCommand(Image image, List<Pixel> currentSeam, List<Pixel> previousColours) {
             this.image = image;
-            this.seam = seam;
-            this.oldColors = oldColors;
+            this.currentSeam = currentSeam;
+            this.previousColours = previousColours;
         }
 
-
+        // Executes seam removal using the removeSeam method
         @Override
         public void execute() {
-            image.removeSeam(seam);
+            // Implementation of the removeSeam method
+            image.removeSeam(currentSeam);
         }
 
-
+        // Undo method to undo previous seam removal
         @Override
         public void undo() {
-            image.addSeam(seam);
-            // Restore the original colors into the seam pixels.
-            for (int i = 0; i < seam.size(); i++) {
-                Pixel seamPixel = seam.get(i);
-                Pixel original = oldColors.get(i);
+
+            // Using the addSeam method to insert the seam back into the image
+            image.addSeam(currentSeam);
+
+            // Restoring the seams previous colours
+            for (int i = 0; i < currentSeam.size(); i++) {
+                Pixel seamPixel = currentSeam.get(i);
+                Pixel original = previousColours.get(i);
                 seamPixel.color = new Color(original.color.getRGB());
             }
         }
     }
 }
-
