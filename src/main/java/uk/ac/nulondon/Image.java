@@ -193,26 +193,30 @@
             result.addAll(elements); // Then add all elements from the collection
             return result;
         }
-    
+
+        // Method to find the seam that maximizes a given value using dynamic programming
         private List<Pixel> getSeamMaximizing(Function<Pixel, Double> valueGetter) {
+            // Arrays to store the computed values for each column in the previous and current rows
             double[] previousValues = new double[width];
             double[] currentValues = new double[width];
     
-            // Track the seams for each column
+            // Track the seams for each column and each row
             List<List<Pixel>> previousSeams = new ArrayList<>(width);
             List<List<Pixel>> currentSeams = new ArrayList<>(width);
     
-            // Initialize first row
+            // Initialize first row: compute initial values and seams
             for (int col = 0; col < width; col++) {
                 Pixel pixel = getPixelAt(0, col);
+                // Calculate the value for the first row using the provided function
                 previousValues[col] = valueGetter.apply(pixel);
-    
+
+                // Initialize the seam for the first row, which is just the pixel itself
                 List<Pixel> seam = new ArrayList<>();
                 seam.add(pixel);
                 previousSeams.add(seam);
             }
     
-            // Process subsequent rows
+            // Process subsequent rows starting from row 1
             for (int row = 1; row < height; row++) {
                 // Reset current seams for this row
                 currentSeams.clear();
@@ -223,42 +227,45 @@
                     // Find the best path from the previous row
                     double maxVal = previousValues[col];
                     int bestCol = col;
-    
+
+                    // Check the column to the left (if it exists)
                     if (col > 0 && previousValues[col - 1] > maxVal) {
                         maxVal = previousValues[col - 1];
                         bestCol = col - 1;
                     }
-    
+
+                    // Check the column to the right (if it exists)
                     if (col < width - 1 && previousValues[col + 1] > maxVal) {
                         maxVal = previousValues[col + 1];
                         bestCol = col + 1;
                     }
     
-                    // Update value
+                    // Update current value for this column
                     currentValues[col] = maxVal + valueGetter.apply(pixel);
-    
-                    // Build new seam by copying from best previous seam
+
+                    // Build a new seam by copying the best seam from the previous row and adding the current pixel
                     List<Pixel> newSeam = new ArrayList<>(previousSeams.get(bestCol));
                     newSeam.add(pixel);
                     currentSeams.add(newSeam);
                 }
     
-                // Prepare for next row
+                // Prepare for next row by updating the previous values and seams
                 System.arraycopy(currentValues, 0, previousValues, 0, width);
                 List<List<Pixel>> temp = previousSeams;
+                // Swap current and previous seams for the next iteration
                 previousSeams = currentSeams;
                 currentSeams = temp;
                 currentSeams.clear();
             }
-    
-            // Find best seam from the bottom row
+
+            // Find the best seam from the bottom row by looking for the column with the highest value
             int bestCol = 0;
             for (int col = 1; col < width; col++) {
                 if (previousValues[col] > previousValues[bestCol]) {
                     bestCol = col;
                 }
             }
-    
+            // Return the best seam from the last row
             return previousSeams.get(bestCol);
         }
     
