@@ -88,26 +88,33 @@
             return Math.sqrt(h_energy * h_energy + v_energy * v_energy);
         }
     
-        private Pixel getPixelAt(int row, int col) {
-            Pixel p = rows.get(row);  // First pixel in row 'row'
-            for (int i = 0; i < col; i++) {
-                p = p.right;          // Move right 'col' times
-            }
-            return p;
+    // Gets pixel at the required row and column
+    private Pixel getPixelByRowCol(int row, int column) {
+
+        // Retrieves the head of the row
+        Pixel pixel = rows.get(row);
+
+        // Iterate through the linked list to find the specified pixel
+        for (int i = 0; i < column; i++) {
+            pixel = pixel.right;
         }
+
+        // Returns the pixel at the given column and row
+        return pixel;
+    }
     
         public void calculateEnergy() {
             // Loop through all rows and columns
             for (int row = 0; row < height; row++) {
                 for (int col = 0; col < width; col++) {
-                    Pixel current = getPixelAt(row, col);
+                    Pixel current = getPixelByRowCol(row, col);
                     // For boundary pixels, use brightness (as specified)
                     if (row == 0 || row == height - 1 || col == 0 || col == width - 1) {
                         current.energy = current.brightness();
                     } else {
                         // Get neighboring pixels using the linked structure
-                        Pixel above = getPixelAt(row - 1, col);
-                        Pixel below = getPixelAt(row + 1, col);
+                        Pixel above = getPixelByRowCol(row - 1, col);
+                        Pixel below = getPixelByRowCol(row + 1, col);
                         current.energy = energy(above, current, below);
                     }
                 }
@@ -117,24 +124,25 @@
     
     
     
-        public List<Pixel> highlightSeam(List<Pixel> seam, Color color) {
-            // We will collect the old state (color) of each pixel in the seam
-            // so that we can restore them later, if needed.
-            List<Pixel> oldValues = new ArrayList<>(seam.size());
-    
-            for (Pixel p : seam) {
-                // Record the pixel's old color in a new Pixel object
-                // (we only care about the color here, not left/right links).
-                oldValues.add(new Pixel(p.color.getRGB()));
-    
-                // Now highlight the seam pixel with the given color.
-                p.color = color;
-            }
-    
-            // Return the old pixel states. Each entry corresponds to the original color
-            // of the seam pixel at the same index in 'seam'.
-            return oldValues;
+    // highlightSeam highlights a given seam with the chosen colour
+    public List<Pixel> highlightSeam(List<Pixel> seam, Color color) {
+
+        // List to store the original colour values of the seam
+        List<Pixel> seamValues = new ArrayList<>(seam.size());
+
+        // Iterates through all pixels in the seam
+        for (Pixel p : seam) {
+
+            // Adds the seams original colour values the seamValues
+            seamValues.add(new Pixel(p.color.getRGB()));
+
+            // Highlight colour applied to the seam
+            p.color = color;
         }
+
+        // Return the original colour values of the seam
+        return seamValues;
+    }
     
         public void removeSeam(List<Pixel> seam) {
             //TODO: remove the provided seam
@@ -208,7 +216,7 @@
     
             // Initialize first row: compute initial values and seams
             for (int col = 0; col < width; col++) {
-                Pixel pixel = getPixelAt(0, col);
+                Pixel pixel = getPixelByRowCol(0, col);
                 // Calculate the value for the first row using the provided function
                 previousValues[col] = valueGetter.apply(pixel);
 
@@ -224,7 +232,7 @@
                 currentSeams.clear();
     
                 for (int col = 0; col < width; col++) {
-                    Pixel pixel = getPixelAt(row, col);
+                    Pixel pixel = getPixelByRowCol(row, col);
     
                     // Find the best path from the previous row
                     double maxVal = previousValues[col];
