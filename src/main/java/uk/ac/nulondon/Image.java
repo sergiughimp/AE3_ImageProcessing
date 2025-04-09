@@ -162,30 +162,32 @@
             }
         }
     
-        public void addSeam(List<Pixel> seam) {
-            // Increase width because we are adding a vertical seam
-            width++;
-    
-            // We assume 'seam' has 1 pixel per row. Each pixel’s .left and .right
-            // references still point to where it was removed.
-            for (int row = 0; row < height; row++) {
-                Pixel pixel = seam.get(row);
-    
-                // If this pixel has a left neighbor, link it
-                if (pixel.left != null) {
-                    pixel.left.right = pixel;
-                }
-                // Otherwise it’s the new leftmost pixel in this row
-                else {
-                    rows.set(row, pixel);
-                }
-    
-                // Link the pixel’s right neighbor back to this pixel if it exists
-                if (pixel.right != null) {
-                    pixel.right.left = pixel;
-                }
+        // addSeam inserts a previously removed seam back into the image
+    public void addSeam(List<Pixel> seam) {
+        
+        // Increases the image width by 1 as we are restoring the seam
+        width++;
+
+        // Linking the seam pixels to the linked list row by row
+        for (int row = 0; row < height; row++) {
+            Pixel pixel = seam.get(row);
+
+            // If the pixel to the left of the current pixel is not null this links them
+            if (pixel.left != null) {
+                pixel.left.right = pixel;
+            }
+
+            // If the pixel to the left is null the current pixel becomes the leftmost pixel in the row
+            else {
+                rows.set(row, pixel);
+            }
+
+            // If the pixel to the right of the current pixel is not null this links them
+            if (pixel.right != null) {
+                pixel.right.left = pixel;
             }
         }
+    }
     
         private static <T> List<T> concat(T element, Collection<? extends T> elements){
             List<T> result = new ArrayList<>();
