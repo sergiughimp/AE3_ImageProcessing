@@ -18,7 +18,7 @@ public class ImageEditor {
     private List<Pixel> previousSeamColors = null;
 
     // Command history for undo functionality.
-    private Deque<CommandControl> previousCommands = new ArrayDeque<>();
+    private final Deque<CommandControl> previousCommands = new ArrayDeque<>();
 
     // Loads the image.
     public void load(String filePath) throws IOException {

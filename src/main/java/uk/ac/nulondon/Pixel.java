@@ -8,7 +8,7 @@ public class Pixel {
 
     double energy;
 
-    final Color color;
+    Color color;
 
     public Pixel(int rgb) {
         this.color = new Color(rgb);
