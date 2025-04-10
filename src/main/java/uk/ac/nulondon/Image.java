@@ -56,7 +56,6 @@
         }
     
         double energy(Pixel above, Pixel current, Pixel below) {
-            //TODO: Calculate energy based on neighbours of the current pixel
     
             // Checking if any of the neighboring pixels are null or invalid
             if (above == null || below == null || current.left == null || current.right == null ||
@@ -120,9 +119,6 @@
             }
         }
     
-    
-    
-    
     // highlightSeam highlights a given seam with the chosen colour
     public List<Pixel> highlightSeam(List<Pixel> seam, Color color) {
 
@@ -144,7 +140,6 @@
     }
     
         public void removeSeam(List<Pixel> seam) {
-            //TODO: remove the provided seam
     
             // Decrease the width by 1 to account for the removed seam
             width--;
