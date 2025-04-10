@@ -58,8 +58,7 @@
         double energy(Pixel above, Pixel current, Pixel below) {
             //TODO: Calculate energy based on neighbours of the current pixel
     
-            // Check if any of the neighboring pixels (above, current, or below) are null or invalid
-            // This ensures we don't encounter NullPointerException or invalid references
+            // Checking if any of the neighboring pixels are null or invalid
             if (above == null || below == null || current.left == null || current.right == null ||
                     above.left == null || above.right == null || below.left == null || below.right == null) {
                 return current.brightness();
