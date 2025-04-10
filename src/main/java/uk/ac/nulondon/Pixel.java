@@ -19,7 +19,6 @@ public class Pixel {
     }
 
     public double brightness() {
-        //TODO: implement brightness calculation
 
         // Calculate the brightness of the pixel based on its RGB color components.
         // Get the blue, green, and red color components of the pixel
